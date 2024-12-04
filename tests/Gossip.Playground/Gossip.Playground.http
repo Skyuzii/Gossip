@@ -1,0 +1,6 @@
+@Gossip.Playground_HostAddress = http://localhost:5169
+
+GET {{Gossip.Playground_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

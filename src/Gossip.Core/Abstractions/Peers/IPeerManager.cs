@@ -10,6 +10,14 @@ public interface IPeerManager
 
     IReadOnlyCollection<PeerAddress> UnreachableRemotePeers { get; }
 
+    event Action<RemotePeer> DiscoveredNewPeer;
+
+    event Action<RemotePeer> DeletedStalePeer;
+
+    event Action<PeerAddress> NewUnreachablePeer;
+
+    event Action<PeerAddress> DeletedUnreachablePeer;
+
     /// <summary>
     /// Return any peer
     /// </summary>

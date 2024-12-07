@@ -29,6 +29,14 @@ internal sealed class PeerManager : IPeerManager
 
     public IReadOnlyCollection<PeerAddress> UnreachableRemotePeers => _unreachableRemotePeers;
 
+    public event Action<RemotePeer>? DiscoveredNewPeer;
+
+    public event Action<RemotePeer>? DeletedStalePeer;
+
+    public event Action<PeerAddress>? NewUnreachablePeer;
+
+    public event Action<PeerAddress>? DeletedUnreachablePeer;
+
     public bool TryGet(PeerAddress address, out Peer peer)
     {
         peer = default;
@@ -54,8 +62,12 @@ internal sealed class PeerManager : IPeerManager
     {
         DeleteStaleActivePeerIfNeed();
 
-        _activeRemotePeers.TryAdd(peer.Address, peer);
         _unreachableRemotePeers.Remove(peer.Address);
+
+        if (_activeRemotePeers.TryAdd(peer.Address, peer))
+        {
+            DiscoveredNewPeer?.Invoke(peer);
+        }
     }
 
     public void Unreachable(PeerAddress address)
@@ -63,7 +75,11 @@ internal sealed class PeerManager : IPeerManager
         DeleteStaleUnreachablePeerIfNeed();
 
         _activeRemotePeers.TryRemove(address, out _);
-        _unreachableRemotePeers.Add(address);
+
+        if (_unreachableRemotePeers.Add(address))
+        {
+            NewUnreachablePeer?.Invoke(address);
+        }
     }
 
     private void DeleteStaleActivePeerIfNeed()
@@ -73,11 +89,11 @@ internal sealed class PeerManager : IPeerManager
             return;
         }
 
-        Peer? remotePeer = _activeRemotePeers.Values.MinBy(x => x.RumorsUpdatedAt);
+        RemotePeer? remotePeer = _activeRemotePeers.Values.MinBy(x => x.RumorsUpdatedAt);
 
-        if (remotePeer is not null)
+        if (remotePeer is not null && _activeRemotePeers.Remove(remotePeer.Address, out _))
         {
-            _activeRemotePeers.Remove(remotePeer.Address, out _);
+            DeletedStalePeer?.Invoke(remotePeer);
         }
     }
 
@@ -90,9 +106,9 @@ internal sealed class PeerManager : IPeerManager
 
         PeerAddress? address = _unreachableRemotePeers.LastOrDefault();
 
-        if (address is not null)
+        if (address is not null && _unreachableRemotePeers.Remove(address.Value))
         {
-            _unreachableRemotePeers.Remove(address.Value);
+            DeletedUnreachablePeer?.Invoke(address.Value);
         }
     }
 }

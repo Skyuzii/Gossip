@@ -11,11 +11,23 @@ internal sealed class HttpMessageSender : IMessageSender, IDisposable
     private const string MessageType = "Gossip-Message-Type";
     private readonly ConcurrentDictionary<PeerAddress, HttpClient> _httpClients;
     private readonly ILogger<HttpMessageSender> _logger;
+    private readonly IPeerManager _peerManager;
 
-    public HttpMessageSender(ILogger<HttpMessageSender> logger)
+    public HttpMessageSender(ILogger<HttpMessageSender> logger, IPeerManager peerManager)
     {
         _logger = logger;
+        _peerManager = peerManager;
         _httpClients = new ConcurrentDictionary<PeerAddress, HttpClient>();
+
+        _peerManager.DeletedUnreachablePeer += OnDeletedUnreachablePeer;
+    }
+
+    private void OnDeletedUnreachablePeer(PeerAddress address)
+    {
+        if (_httpClients.TryGetValue(address, out HttpClient? httpClient) && _httpClients.TryRemove(address, out _))
+        {
+            httpClient.Dispose();
+        }
     }
 
     public async Task<MessageSendResult> Send(PeerAddress receiver, Message message, CancellationToken cancellationToken)
@@ -52,6 +64,8 @@ internal sealed class HttpMessageSender : IMessageSender, IDisposable
 
     public void Dispose()
     {
+        _peerManager.DeletedUnreachablePeer -= OnDeletedUnreachablePeer;
+
         foreach (KeyValuePair<PeerAddress, HttpClient> httpClient in _httpClients)
         {
             httpClient.Value.Dispose();

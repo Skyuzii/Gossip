@@ -21,7 +21,7 @@ public sealed class Startup
                 builder =>
                 {
                     builder
-                        .SetMessageSender(serviceProvider => new HttpMessageSender(serviceProvider.GetRequiredService<ILogger<HttpMessageSender>>()))
+                        .SetMessageSender(serviceProvider => new HttpMessageSender(serviceProvider.GetRequiredService<ILogger<HttpMessageSender>>(), serviceProvider.GetRequiredService<IPeerManager>()))
                         .SetLocalPeerAddress(new PeerAddress(new Uri(gossiperConfig!.LocalPeer)))
                         .SetSyncDigestInMs(10000);
 

@@ -20,13 +20,13 @@ internal sealed class RumorDigestAck2MessageHandler : BaseMessageHandler<RumorDi
     {
         foreach (FullPeerInfo? fullPeerInfo in message.FullPeerInfos)
         {
-            if (PeerManager.TryGet(fullPeerInfo.Address, out Peer existPeer))
+            if (PeerManager.TryGet(fullPeerInfo.Address, out Peer existPeer) && existPeer is RemotePeer existRemotePeer)
             {
-                existPeer.Apply(fullPeerInfo.Rumors);
+                existRemotePeer.Apply(fullPeerInfo.Generation, fullPeerInfo.Rumors);
             }
             else
             {
-                PeerManager.Add(Peer.CreateRemote(fullPeerInfo.Address, fullPeerInfo.Rumors));
+                PeerManager.Add(RemotePeer.New(fullPeerInfo.Address, fullPeerInfo.Generation, fullPeerInfo.Rumors));
             }
         }
 

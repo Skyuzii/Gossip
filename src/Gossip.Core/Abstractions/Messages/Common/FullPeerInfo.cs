@@ -3,4 +3,4 @@ using Gossip.Core.Abstractions.Peers.Rumors;
 
 namespace Gossip.Core.Abstractions.Messages.Common;
 
-public sealed record FullPeerInfo(PeerAddress Address, IReadOnlyCollection<Rumor> Rumors);
+public sealed record FullPeerInfo(PeerAddress Address, PeerGeneration Generation, IReadOnlyCollection<Rumor> Rumors);

@@ -22,9 +22,9 @@ public static class GossiperRegistrars
         GossiperConfig gossiperConfig = BuildConfig(configBuilder);
 
         var peerManager = new PeerManager(
-            Peer.CreateLocal(gossiperConfig.LocalPeerAddress),
+            LocalPeer.New(gossiperConfig.LocalPeerAddress),
             new PeerManagerOptions(gossiperConfig.ActiveRemotePeersCapacity),
-            gossiperConfig.RemoteStartingPeerAddresses.Select(Peer.CreateRemoteStarting).ToArray());
+            gossiperConfig.RemoteStartingPeerAddresses.Select(RemotePeer.NewStarting).ToArray());
 
         services.TryAddSingleton<IPeerManager>(peerManager);
 

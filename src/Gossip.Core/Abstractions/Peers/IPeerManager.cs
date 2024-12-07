@@ -2,11 +2,11 @@ namespace Gossip.Core.Abstractions.Peers;
 
 public interface IPeerManager
 {
-    Peer LocalPeer { get; }
+    LocalPeer LocalPeer { get; }
 
     int ActiveRemotePeersCount { get; }
 
-    IEnumerable<Peer> ActiveRemotePeers { get; }
+    IEnumerable<RemotePeer> ActiveRemotePeers { get; }
 
     /// <summary>
     /// Return any peer
@@ -16,7 +16,7 @@ public interface IPeerManager
     /// <returns></returns>
     bool TryGet(PeerAddress address, out Peer peer);
 
-    void Add(Peer peer);
+    void Add(RemotePeer peer);
 
     void Unreachable(PeerAddress address);
 }

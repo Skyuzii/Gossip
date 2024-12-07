@@ -7,23 +7,23 @@ namespace Gossip.Core.Implementations.Managers;
 internal sealed class PeerManager : IPeerManager
 {
     private readonly PeerManagerOptions _options;
-    private readonly ConcurrentDictionary<PeerAddress, Peer> _activeRemotePeers;
+    private readonly ConcurrentDictionary<PeerAddress, RemotePeer> _activeRemotePeers;
 
     public PeerManager(
-        Peer localPeer,
+        LocalPeer localPeer,
         PeerManagerOptions options,
-        IReadOnlyCollection<Peer> activeRemoteStartingPeers)
+        IReadOnlyCollection<RemotePeer> activeRemoteStartingPeers)
     {
         _options = options;
         LocalPeer = localPeer;
-        _activeRemotePeers = new ConcurrentDictionary<PeerAddress, Peer>(activeRemoteStartingPeers.ToDictionary(x => x.Address, y => y));
+        _activeRemotePeers = new ConcurrentDictionary<PeerAddress, RemotePeer>(activeRemoteStartingPeers.ToDictionary(x => x.Address, y => y));
     }
 
-    public Peer LocalPeer { get; }
+    public LocalPeer LocalPeer { get; }
 
     public int ActiveRemotePeersCount => _activeRemotePeers.Count;
 
-    public IEnumerable<Peer> ActiveRemotePeers => _activeRemotePeers.Values;
+    public IEnumerable<RemotePeer> ActiveRemotePeers => _activeRemotePeers.Values;
 
     public bool TryGet(PeerAddress address, out Peer peer)
     {
@@ -36,7 +36,7 @@ internal sealed class PeerManager : IPeerManager
             return true;
         }
 
-        if (_activeRemotePeers.TryGetValue(address, out Peer? existRemotePeer))
+        if (_activeRemotePeers.TryGetValue(address, out RemotePeer? existRemotePeer))
         {
             peer = existRemotePeer;
 
@@ -46,7 +46,7 @@ internal sealed class PeerManager : IPeerManager
         return false;
     }
 
-    public void Add(Peer peer)
+    public void Add(RemotePeer peer)
     {
         DeleteStaleActivePeerIfNeed();
 

@@ -36,11 +36,11 @@ internal sealed class StartRumorDigestMessageHandler : BaseMessageHandler<StartR
     {
         var peerInfos = new List<DigestPeerInfo>(capacity: PeerManager.ActiveRemotePeersCount + 1)
         {
-            new DigestPeerInfo(PeerManager.LocalPeer.Address, PeerManager.LocalPeer.GetMaxVersion())
+            new DigestPeerInfo(PeerManager.LocalPeer.Address, PeerManager.LocalPeer.Generation, PeerManager.LocalPeer.GetMaxVersion())
         };
 
         peerInfos.AddRange(PeerManager.ActiveRemotePeers
-            .Select(peer => new DigestPeerInfo(peer.Address, peer.GetMaxVersion()))
+            .Select(peer => new DigestPeerInfo(peer.Address, peer.Generation, peer.GetMaxVersion()))
             .ToArray());
 
         return new RumorDigestMessage(sender, peerInfos);

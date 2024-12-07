@@ -1,38 +1,27 @@
 namespace Gossip.Core.Abstractions.Peers.Rumors;
 
-public readonly record struct RumorVersion(long Timestamp, ulong SequenceId) : IComparable<RumorVersion>
+public readonly record struct RumorVersion(long Value) : IComparable<RumorVersion>
 {
+    private static long Version;
+
     public static RumorVersion New()
     {
-        return new RumorVersion(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), ulong.MinValue);
+        return new RumorVersion(Interlocked.Increment(ref Version));
     }
 
-    public static RumorVersion Empty => new RumorVersion(Timestamp: 0, SequenceId: 0);
-
-    public RumorVersion Increment()
+    public static RumorVersion Empty()
     {
-        return new RumorVersion(Timestamp, SequenceId + 1);
+        return new RumorVersion(Value: 0);
     }
 
-    public bool Equals(RumorVersion other)
+    public override string ToString()
     {
-        return other.Timestamp == Timestamp && other.SequenceId == SequenceId;
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Timestamp, SequenceId);
+        return Value.ToString();
     }
 
     public int CompareTo(RumorVersion other)
     {
-        int cmp = Timestamp.CompareTo(other.Timestamp);
-        if (cmp == 0)
-        {
-            cmp = SequenceId.CompareTo(other.SequenceId);
-        }
-
-        return cmp;
+        return Value.CompareTo(other.Value);
     }
 
     public static bool operator ==(in RumorVersion x, in RumorVersion y)
@@ -47,66 +36,21 @@ public readonly record struct RumorVersion(long Timestamp, ulong SequenceId) : I
 
     public static bool operator <(in RumorVersion x, in RumorVersion y)
     {
-        if (x.Timestamp < y.Timestamp)
-        {
-            return true;
-        }
-
-        if (x.Timestamp == y.Timestamp)
-        {
-            return x.SequenceId < y.SequenceId;
-        }
-
-        return false;
+        return x.Value < y.Value;
     }
 
     public static bool operator <=(in RumorVersion x, in RumorVersion y)
     {
-        if (x.Timestamp < y.Timestamp)
-        {
-            return true;
-        }
-
-        if (x.Timestamp == y.Timestamp)
-        {
-            return x.SequenceId <= y.SequenceId;
-        }
-
-        return false;
+        return x.Value <= y.Value;
     }
 
     public static bool operator >(in RumorVersion x, in RumorVersion y)
     {
-        if (x.Timestamp > y.Timestamp)
-        {
-            return true;
-        }
-
-        if (x.Timestamp == y.Timestamp)
-        {
-            return x.SequenceId > y.SequenceId;
-        }
-
-        return false;
+        return x.Value > y.Value;
     }
 
     public static bool operator >=(in RumorVersion x, in RumorVersion y)
     {
-        if (x.Timestamp > y.Timestamp)
-        {
-            return true;
-        }
-
-        if (x.Timestamp == y.Timestamp)
-        {
-            return x.SequenceId >= y.SequenceId;
-        }
-
-        return false;
-    }
-
-    public override string ToString()
-    {
-        return $"{Timestamp}:{SequenceId}";
+        return x.Value >= y.Value;
     }
 }

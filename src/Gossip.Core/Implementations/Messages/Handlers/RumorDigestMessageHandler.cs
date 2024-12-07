@@ -25,9 +25,20 @@ public sealed class RumorDigestMessageHandler : BaseMessageHandler<RumorDigestMe
 
         foreach (DigestPeerInfo digestPeerInfo in message.DigestPeerInfos)
         {
-            if (!PeerManager.TryGet(digestPeerInfo.Address, out Peer existPeer))
+            if (!PeerManager.TryGet(digestPeerInfo.Address, out Peer existPeer) || digestPeerInfo.Generation > existPeer.Generation)
             {
-                digestPeerInfos.Add(digestPeerInfo with { MaxVersion = RumorVersion.Empty });
+                digestPeerInfos.Add(digestPeerInfo with { Generation = PeerGeneration.Empty(), MaxVersion = RumorVersion.Empty() });
+
+                continue;
+            }
+
+            if (digestPeerInfo.Generation < existPeer.Generation)
+            {
+                fullPeerInfos.Add(
+                    new FullPeerInfo(
+                        existPeer.Address,
+                        existPeer.Generation,
+                        existPeer.Rumors.Values.ToArray()));
 
                 continue;
             }
@@ -46,6 +57,7 @@ public sealed class RumorDigestMessageHandler : BaseMessageHandler<RumorDigestMe
                 fullPeerInfos.Add(
                     new FullPeerInfo(
                         existPeer.Address,
+                        existPeer.Generation,
                         existPeer.Rumors.Values.Where(x => x.Version > digestPeerInfo.MaxVersion).ToArray()));
             }
         }

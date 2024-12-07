@@ -17,10 +17,10 @@ public sealed class DefaultReceiversPicker : IReceiversPicker
         // todo: add optimization on finding starting peer
         var receivers = new List<PeerAddress>(capacity: 2);
 
-        Peer[] activeRemotePeers = _peerManager.ActiveRemotePeers.ToArray();
+        RemotePeer[] activeRemotePeers = _peerManager.ActiveRemotePeers.ToArray();
 
-        Peer? firstReceiver = activeRemotePeers.FirstOrDefault(x => x.IsRemoteStarting);
-        Peer? secondReceiver = activeRemotePeers.FirstOrDefault(x => !x.IsRemoteStarting);
+        Peer? firstReceiver = activeRemotePeers.FirstOrDefault(x => x.IsStarting);
+        Peer? secondReceiver = activeRemotePeers.FirstOrDefault(x => !x.IsStarting);
 
         if (firstReceiver is not null)
         {

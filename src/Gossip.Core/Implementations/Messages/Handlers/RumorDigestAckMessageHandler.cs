@@ -3,6 +3,7 @@ using Gossip.Core.Abstractions.Messages.Common;
 using Gossip.Core.Abstractions.Messages.RumorDigestAck;
 using Gossip.Core.Abstractions.Messages.RumorDigestAck2;
 using Gossip.Core.Abstractions.Peers;
+using Gossip.Core.Abstractions.Peers.Rumors;
 
 using Microsoft.Extensions.Logging;
 
@@ -26,15 +27,15 @@ internal sealed class RumorDigestAckMessageHandler : BaseMessageHandler<RumorDig
 
     private void HandleFullPeerInfos(RumorDigestAckMessage rumorDigestAckMessage)
     {
-        foreach (FullPeerInfo? fullPeerInfo in rumorDigestAckMessage.FullPeerInfos)
+        foreach (FullPeerInfo fullPeerInfo in rumorDigestAckMessage.FullPeerInfos)
         {
-            if (PeerManager.TryGet(fullPeerInfo.Address, out Peer? existPeer))
+            if (PeerManager.TryGet(fullPeerInfo.Address, out Peer? existPeer) && existPeer is RemotePeer existRemotePeer)
             {
-                existPeer.Apply(fullPeerInfo.Rumors);
+                existRemotePeer.Apply(fullPeerInfo.Generation, fullPeerInfo.Rumors);
             }
             else
             {
-                PeerManager.Add(Peer.CreateRemote(fullPeerInfo.Address, fullPeerInfo.Rumors));
+                PeerManager.Add(RemotePeer.New(fullPeerInfo.Address, fullPeerInfo.Generation, fullPeerInfo.Rumors));
             }
         }
     }
@@ -50,11 +51,28 @@ internal sealed class RumorDigestAckMessageHandler : BaseMessageHandler<RumorDig
 
         foreach (DigestPeerInfo digestPeerInfo in rumorDigestAckMessage.DigestPeerInfos)
         {
-            if (PeerManager.TryGet(digestPeerInfo.Address, out Peer? existPeer) && digestPeerInfo.MaxVersion < existPeer.GetMaxVersion())
+            if (!PeerManager.TryGet(digestPeerInfo.Address, out Peer? existPeer) || digestPeerInfo.Generation > existPeer.Generation)
+            {
+                continue;
+            }
+
+            if (digestPeerInfo.Generation < existPeer.Generation)
             {
                 fullPeerInfos.Add(
                     new FullPeerInfo(
                         existPeer.Address,
+                        existPeer.Generation,
+                        existPeer.Rumors.Values.ToArray()));
+
+                continue;
+            }
+
+            if (digestPeerInfo.MaxVersion < existPeer.GetMaxVersion())
+            {
+                fullPeerInfos.Add(
+                    new FullPeerInfo(
+                        existPeer.Address,
+                        existPeer.Generation,
                         existPeer.Rumors.Values.Where(x => x.Version > digestPeerInfo.MaxVersion).ToArray()));
             }
         }

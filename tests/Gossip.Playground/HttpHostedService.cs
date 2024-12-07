@@ -41,6 +41,7 @@ internal sealed class HttpHostedService : IHostedService
         StringBuilder peerInfo = new StringBuilder()
             .AppendLine("LocalPeer:")
             .AppendLine($"   Address: {_peerManager.LocalPeer.Address.Value}")
+            .AppendLine($"   Generation: {_peerManager.LocalPeer.Generation.Value}")
             .AppendLine($"   Rumors:");
 
         foreach ((RumorName _, Rumor rumor) in _peerManager.LocalPeer.Rumors)
@@ -48,14 +49,16 @@ internal sealed class HttpHostedService : IHostedService
             peerInfo
                 .AppendLine($"      Name: {rumor.Name.Value}")
                 .AppendLine($"      Value: {rumor.Value.Value}")
-                .AppendLine($"      Version: {rumor.Version.ToString()}");
+                .AppendLine($"      Version: {rumor.Version.ToString()}")
+                .AppendLine(string.Empty);
         }
 
-        foreach (Peer remotePeer in _peerManager.ActiveRemotePeers)
+        foreach (RemotePeer remotePeer in _peerManager.ActiveRemotePeers)
         {
             peerInfo
                 .AppendLine("RemotePeer:")
                 .AppendLine($"   Address: {remotePeer.Address.Value}")
+                .AppendLine($"   Generation: {remotePeer.Generation.Value}")
                 .AppendLine($"   Rumors:");
 
             foreach ((RumorName _, Rumor rumor) in remotePeer.Rumors)
@@ -63,7 +66,8 @@ internal sealed class HttpHostedService : IHostedService
                 peerInfo
                     .AppendLine($"      Name: {rumor.Name.Value}")
                     .AppendLine($"      Value: {rumor.Value.Value}")
-                    .AppendLine($"      Version: {rumor.Version.ToString()}");
+                    .AppendLine($"      Version: {rumor.Version.ToString()}")
+                    .AppendLine(string.Empty);
             }
         }
 
@@ -80,10 +84,10 @@ internal sealed class HttpHostedService : IHostedService
 
         if (!string.IsNullOrWhiteSpace(rumorVersionStr))
         {
-            rumorVersion = new RumorVersion(long.Parse(rumorVersionStr.Split(":")[0]), (ulong)long.Parse(rumorVersionStr.Split(":")[1]));
+            rumorVersion = new RumorVersion(long.Parse(rumorVersionStr));
         }
 
-        _peerManager.LocalPeer.Apply(new Rumor(new RumorName(rumorName), new RumorValue(rumorValue), rumorVersion ?? RumorVersion.New()));
+        _peerManager.LocalPeer.Apply(new[] { new Rumor(new RumorName(rumorName), new RumorValue(rumorValue), rumorVersion ?? RumorVersion.New()) });
 
         return Task.CompletedTask;
     }

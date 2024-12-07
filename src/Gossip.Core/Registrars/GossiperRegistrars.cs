@@ -5,6 +5,7 @@ using Gossip.Core.Implementations.Gossipers;
 using Gossip.Core.Implementations.Managers;
 using Gossip.Core.Implementations.Messages.Dispatchers;
 using Gossip.Core.Implementations.Messages.Handlers;
+using Gossip.Core.Implementations.Messages.Handlers.Collectors;
 using Gossip.Core.Implementations.ReceiversPickers;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +34,8 @@ public static class GossiperRegistrars
             {
                 IMessageSender messageSender = gossiperConfig.MessageSender.Invoke(serviceProvider);
 
+                IInfoCollector infoCollector = new InfoCollector(peerManager);
+
                 IReceiversPicker receiversPicker = gossiperConfig.ReceiversPicker ?? new DefaultReceiversPicker(peerManager);
 
                 var messageHandlers = new IMessageHandler[]
@@ -45,11 +48,13 @@ public static class GossiperRegistrars
                     new RumorDigestMessageHandler(
                         messageSender,
                         peerManager,
-                        serviceProvider.GetRequiredService<ILogger<RumorDigestMessageHandler>>()),
+                        serviceProvider.GetRequiredService<ILogger<RumorDigestMessageHandler>>(),
+                        infoCollector),
                     new RumorDigestAckMessageHandler(
                         messageSender,
                         peerManager,
-                        serviceProvider.GetRequiredService<ILogger<RumorDigestAckMessageHandler>>()),
+                        serviceProvider.GetRequiredService<ILogger<RumorDigestAckMessageHandler>>(),
+                        infoCollector),
                     new RumorDigestAck2MessageHandler(
                         messageSender,
                         peerManager,

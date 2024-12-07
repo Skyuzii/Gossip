@@ -23,6 +23,7 @@ public abstract class Peer
     {
         Address = address;
         Generation = generation;
+        RumorsUpdatedAt = DateTimeOffset.UtcNow;
         RumorsProtected = new ConcurrentDictionary<RumorName, Rumor>(rumors.ToDictionary(x => x.Name, y => y));
     }
 

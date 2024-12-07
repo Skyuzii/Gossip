@@ -5,10 +5,14 @@ using Gossip.Core.Abstractions;
 using Gossip.Core.Abstractions.Messages.Common;
 using Gossip.Core.Abstractions.Peers;
 using Gossip.Core.Abstractions.Peers.Rumors;
+using Gossip.IntegrationsTests.Framework.Constants;
+using Gossip.IntegrationsTests.Framework.Serializers;
 
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Primitives;
 
-namespace Gossip.Playground;
+namespace Gossip.IntegrationsTests.Framework.HostedServices;
 
 internal sealed class HttpHostedService : IHostedService
 {

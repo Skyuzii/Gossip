@@ -1,4 +1,4 @@
-namespace Gossip.Playground;
+namespace Gossip.IntegrationsTests.Framework.Constants;
 
 internal sealed class HttpConstants
 {

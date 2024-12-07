@@ -3,8 +3,11 @@ using System.Collections.Concurrent;
 using Gossip.Core.Abstractions.Messages;
 using Gossip.Core.Abstractions.Messages.Common;
 using Gossip.Core.Abstractions.Peers;
+using Gossip.IntegrationsTests.Framework.Serializers;
 
-namespace Gossip.Playground;
+using Microsoft.Extensions.Logging;
+
+namespace Gossip.IntegrationsTests.Framework.MessageSenders;
 
 internal sealed class HttpMessageSender : IMessageSender, IDisposable
 {

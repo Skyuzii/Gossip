@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gossip.Core", "src\Gossip.C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0981C2AC-53A7-47F0-A78C-E23C9455DC18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gossip.Playground", "tests\Gossip.Playground\Gossip.Playground.csproj", "{16B4ABD1-201F-4E3F-A1E0-CCD3B3B1070A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gossip.IntegrationsTests", "tests\Gossip.IntegrationsTests\Gossip.IntegrationsTests.csproj", "{14C76643-0019-47EF-8AAF-1723B9C0DD21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,13 +18,13 @@ Global
 		{CBDCB270-C6B5-4627-8388-D091B79D7A8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBDCB270-C6B5-4627-8388-D091B79D7A8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBDCB270-C6B5-4627-8388-D091B79D7A8E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{16B4ABD1-201F-4E3F-A1E0-CCD3B3B1070A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{16B4ABD1-201F-4E3F-A1E0-CCD3B3B1070A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{16B4ABD1-201F-4E3F-A1E0-CCD3B3B1070A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{16B4ABD1-201F-4E3F-A1E0-CCD3B3B1070A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14C76643-0019-47EF-8AAF-1723B9C0DD21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14C76643-0019-47EF-8AAF-1723B9C0DD21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14C76643-0019-47EF-8AAF-1723B9C0DD21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14C76643-0019-47EF-8AAF-1723B9C0DD21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{CBDCB270-C6B5-4627-8388-D091B79D7A8E} = {DA21E831-4A21-4395-A792-1ED7B3BBB03C}
-		{16B4ABD1-201F-4E3F-A1E0-CCD3B3B1070A} = {0981C2AC-53A7-47F0-A78C-E23C9455DC18}
+		{14C76643-0019-47EF-8AAF-1723B9C0DD21} = {0981C2AC-53A7-47F0-A78C-E23C9455DC18}
 	EndGlobalSection
 EndGlobal

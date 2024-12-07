@@ -5,7 +5,7 @@ using Gossip.Core.Abstractions.Messages.RumorDigest;
 using Gossip.Core.Abstractions.Messages.RumorDigestAck;
 using Gossip.Core.Abstractions.Messages.RumorDigestAck2;
 
-namespace Gossip.Playground;
+namespace Gossip.IntegrationsTests.Framework.Serializers;
 
 internal static class JsonMessageSerializer
 {

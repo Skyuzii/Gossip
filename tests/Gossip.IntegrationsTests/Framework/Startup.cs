@@ -1,7 +1,17 @@
 ﻿using Gossip.Core.Abstractions.Peers;
 using Gossip.Core.Registrars;
+using Gossip.IntegrationsTests.Framework.Configurations;
+using Gossip.IntegrationsTests.Framework.Constants;
+using Gossip.IntegrationsTests.Framework.HostedServices;
+using Gossip.IntegrationsTests.Framework.MessageSenders;
 
-namespace Gossip.Playground;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+namespace Gossip.IntegrationsTests.Framework;
 
 public sealed class Startup
 {
@@ -23,7 +33,7 @@ public sealed class Startup
                     builder
                         .SetMessageSender(serviceProvider => new HttpMessageSender(serviceProvider.GetRequiredService<ILogger<HttpMessageSender>>(), serviceProvider.GetRequiredService<IPeerManager>()))
                         .SetLocalPeerAddress(new PeerAddress(new Uri(gossiperConfig!.LocalPeer)))
-                        .SetSyncDigestInMs(10000);
+                        .SetSyncDigestInMs(gossiperConfig.SyncDigestInMs);
 
                     if (gossiperConfig.RemoteStartingPeerAddresses.Length > 0)
                     {

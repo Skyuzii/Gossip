@@ -8,49 +8,33 @@ using Microsoft.Extensions.Logging;
 
 namespace Gossip.Core.Implementations.Messages.Handlers;
 
-internal sealed class RumorDigestAckMessageHandler : IMessageHandler
+internal sealed class RumorDigestAckMessageHandler : BaseMessageHandler<RumorDigestAckMessage>
 {
-    private readonly IPeerManager _peerManager;
-    private readonly IMessageSender _messageSender;
-    private readonly ILogger<RumorDigestAckMessageHandler> _logger;
-
     public RumorDigestAckMessageHandler(
-        IPeerManager peerManager,
         IMessageSender messageSender,
-        ILogger<RumorDigestAckMessageHandler> logger)
+        IPeerManager peerManager,
+        ILogger logger) : base(MessageType.RumorDigestAck, messageSender, peerManager, logger)
     {
-        _peerManager = peerManager;
-        _messageSender = messageSender;
-        _logger = logger;
     }
 
-    public MessageType Type => MessageType.RumorDigestAck;
-
-    public Task Handle(Message message, CancellationToken cancellationToken)
+    protected override Task HandleInternal(RumorDigestAckMessage message, CancellationToken cancellationToken)
     {
-        if (message is not RumorDigestAckMessage rumorDigestAckMessage)
-        {
-            throw new ArgumentOutOfRangeException();
-        }
+        HandleFullPeerInfos(message);
 
-        _logger.LogInformation("Start handling the message {@RumorDigestAckMessage}", rumorDigestAckMessage);
-
-        HandleFullPeerInfos(rumorDigestAckMessage);
-
-        return HandleDigestPeerInfos(rumorDigestAckMessage, cancellationToken);
+        return HandleDigestPeerInfos(message, cancellationToken);
     }
 
     private void HandleFullPeerInfos(RumorDigestAckMessage rumorDigestAckMessage)
     {
-        foreach (FullPeerInfo? actualPeerInfo in rumorDigestAckMessage.FullPeerInfos)
+        foreach (FullPeerInfo? fullPeerInfo in rumorDigestAckMessage.FullPeerInfos)
         {
-            if (_peerManager.TryGet(actualPeerInfo.Address, out Peer? existPeer))
+            if (PeerManager.TryGet(fullPeerInfo.Address, out Peer? existPeer))
             {
-                existPeer.Apply(actualPeerInfo.Rumors);
+                existPeer.Apply(fullPeerInfo.Rumors);
             }
             else
             {
-                _peerManager.Add(Peer.CreateRemote(actualPeerInfo.Address, actualPeerInfo.Rumors));
+                PeerManager.Add(Peer.CreateRemote(fullPeerInfo.Address, fullPeerInfo.Rumors));
             }
         }
     }
@@ -66,7 +50,7 @@ internal sealed class RumorDigestAckMessageHandler : IMessageHandler
 
         foreach (DigestPeerInfo digestPeerInfo in rumorDigestAckMessage.DigestPeerInfos)
         {
-            if (_peerManager.TryGet(digestPeerInfo.Address, out Peer? existPeer) && digestPeerInfo.MaxVersion < existPeer.GetMaxVersion())
+            if (PeerManager.TryGet(digestPeerInfo.Address, out Peer? existPeer) && digestPeerInfo.MaxVersion < existPeer.GetMaxVersion())
             {
                 fullPeerInfos.Add(
                     new FullPeerInfo(
@@ -75,10 +59,9 @@ internal sealed class RumorDigestAckMessageHandler : IMessageHandler
             }
         }
 
-        var rumorDigestAck2Message = new RumorDigestAck2Message(_peerManager.LocalPeer.Address, fullPeerInfos);
-
-        _logger.LogInformation("Send to {Receiver} the message {@RumorDigestAck2Message}", rumorDigestAckMessage.Sender, rumorDigestAck2Message);
-
-        return _messageSender.Send(rumorDigestAckMessage.Sender, rumorDigestAck2Message, cancellationToken);
+        return SendMessage(
+            rumorDigestAckMessage.Sender,
+            new RumorDigestAck2Message(PeerManager.LocalPeer.Address, fullPeerInfos),
+            cancellationToken);
     }
 }

@@ -9,39 +9,23 @@ using Microsoft.Extensions.Logging;
 
 namespace Gossip.Core.Implementations.Messages.Handlers;
 
-public sealed class RumorDigestMessageHandler : IMessageHandler
+public sealed class RumorDigestMessageHandler : BaseMessageHandler<RumorDigestMessage>
 {
-    private readonly IPeerManager _peerManager;
-    private readonly IMessageSender _messageSender;
-    private readonly ILogger<RumorDigestMessageHandler> _logger;
-
     public RumorDigestMessageHandler(
-        IPeerManager peerManager,
         IMessageSender messageSender,
-        ILogger<RumorDigestMessageHandler> logger)
+        IPeerManager peerManager,
+        ILogger logger) : base(MessageType.RumorDigest, messageSender, peerManager, logger)
     {
-        _peerManager = peerManager;
-        _messageSender = messageSender;
-        _logger = logger;
     }
 
-    public MessageType Type => MessageType.RumorDigest;
-
-    public Task Handle(Message message, CancellationToken cancellationToken)
+    protected override Task HandleInternal(RumorDigestMessage message, CancellationToken cancellationToken)
     {
-        if (message is not RumorDigestMessage rumorDigestMessage)
-        {
-            throw new ArgumentOutOfRangeException();
-        }
-
-        _logger.LogInformation("Start handling the message {@RumorDigestMessage}", rumorDigestMessage);
-
         var digestPeerInfos = new List<DigestPeerInfo>();
         var fullPeerInfos = new List<FullPeerInfo>();
 
-        foreach (DigestPeerInfo digestPeerInfo in rumorDigestMessage.DigestPeerInfos)
+        foreach (DigestPeerInfo digestPeerInfo in message.DigestPeerInfos)
         {
-            if (!_peerManager.TryGet(digestPeerInfo.Address, out Peer existPeer))
+            if (!PeerManager.TryGet(digestPeerInfo.Address, out Peer existPeer))
             {
                 digestPeerInfos.Add(digestPeerInfo with { MaxVersion = RumorVersion.Empty });
 
@@ -66,10 +50,9 @@ public sealed class RumorDigestMessageHandler : IMessageHandler
             }
         }
 
-        var rumorDigestAckMessage = new RumorDigestAckMessage(_peerManager.LocalPeer.Address, digestPeerInfos, fullPeerInfos);
-
-        _logger.LogInformation("Send to {Receiver} the message {@RumorDigestAckMessage}", message.Sender, rumorDigestAckMessage);
-
-        return _messageSender.Send(message.Sender, rumorDigestAckMessage, cancellationToken);
+        return SendMessage(
+            message.Sender,
+            new RumorDigestAckMessage(PeerManager.LocalPeer.Address, digestPeerInfos, fullPeerInfos),
+            cancellationToken);
     }
 }

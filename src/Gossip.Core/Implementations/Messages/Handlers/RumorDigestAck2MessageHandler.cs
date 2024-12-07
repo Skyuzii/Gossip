@@ -1,3 +1,4 @@
+using Gossip.Core.Abstractions.Messages;
 using Gossip.Core.Abstractions.Messages.Common;
 using Gossip.Core.Abstractions.Messages.RumorDigestAck2;
 using Gossip.Core.Abstractions.Peers;
@@ -6,39 +7,26 @@ using Microsoft.Extensions.Logging;
 
 namespace Gossip.Core.Implementations.Messages.Handlers;
 
-internal sealed class RumorDigestAck2MessageHandler : IMessageHandler
+internal sealed class RumorDigestAck2MessageHandler : BaseMessageHandler<RumorDigestAck2Message>
 {
-    private readonly IPeerManager _peerManager;
-    private readonly ILogger<RumorDigestAck2MessageHandler> _logger;
-
     public RumorDigestAck2MessageHandler(
+        IMessageSender messageSender,
         IPeerManager peerManager,
-        ILogger<RumorDigestAck2MessageHandler> logger)
+        ILogger logger) : base(MessageType.RumorDigestAck2, messageSender, peerManager, logger)
     {
-        _peerManager = peerManager;
-        _logger = logger;
     }
 
-    public MessageType Type => MessageType.RumorDigestAck2;
-
-    public Task Handle(Message message, CancellationToken cancellationToken)
+    protected override Task HandleInternal(RumorDigestAck2Message message, CancellationToken cancellationToken)
     {
-        if (message is not RumorDigestAck2Message rumorDigestAck2Message)
+        foreach (FullPeerInfo? fullPeerInfo in message.FullPeerInfos)
         {
-            throw new ArgumentOutOfRangeException();
-        }
-
-        _logger.LogInformation("Start handling the message {@RumorDigestAck2Message}", rumorDigestAck2Message);
-
-        foreach (FullPeerInfo? fullPeerInfo in rumorDigestAck2Message.FullPeerInfos)
-        {
-            if (_peerManager.TryGet(fullPeerInfo.Address, out Peer existPeer))
+            if (PeerManager.TryGet(fullPeerInfo.Address, out Peer existPeer))
             {
                 existPeer.Apply(fullPeerInfo.Rumors);
             }
             else
             {
-                _peerManager.Add(Peer.CreateRemote(fullPeerInfo.Address, fullPeerInfo.Rumors));
+                PeerManager.Add(Peer.CreateRemote(fullPeerInfo.Address, fullPeerInfo.Rumors));
             }
         }
 

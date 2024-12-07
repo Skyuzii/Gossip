@@ -17,12 +17,11 @@ public sealed class Startup
         var gossiperConfig = Configuration.GetSection(nameof(GossiperConfiguration)).Get<GossiperConfiguration>();
 
         services
-            .AddSingleton<IMessageSerializer, JsonMessageSerializer>()
             .AddGossiper(
                 builder =>
                 {
                     builder
-                        .SetMessageSender(serviceProvider => new HttpMessageSender(serviceProvider.GetRequiredService<IMessageSerializer>()))
+                        .SetMessageSender(serviceProvider => new HttpMessageSender(serviceProvider.GetRequiredService<ILogger<HttpMessageSender>>()))
                         .SetLocalPeerAddress(new PeerAddress(new Uri(gossiperConfig!.LocalPeer)))
                         .SetSyncDigestInMs(10000);
 

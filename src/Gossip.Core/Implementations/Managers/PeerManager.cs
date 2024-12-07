@@ -48,15 +48,17 @@ internal sealed class PeerManager : IPeerManager
 
     public void Add(Peer peer)
     {
-        DeleteStalePeerIfNeed();
+        DeleteStaleActivePeerIfNeed();
 
-        if (!_activeRemotePeers.ContainsKey(peer.Address))
-        {
-            _activeRemotePeers.TryAdd(peer.Address, peer);
-        }
+        _activeRemotePeers.TryAdd(peer.Address, peer);
     }
 
-    private void DeleteStalePeerIfNeed()
+    public void Unreachable(PeerAddress address)
+    {
+        _activeRemotePeers.TryRemove(address, out _);
+    }
+
+    private void DeleteStaleActivePeerIfNeed()
     {
         if (_activeRemotePeers.Count < _options.ActiveRemotePeersCapacity)
         {

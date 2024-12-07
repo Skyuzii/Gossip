@@ -7,9 +7,9 @@ using Gossip.Core.Abstractions.Messages.RumorDigestAck2;
 
 namespace Gossip.Playground;
 
-internal sealed class JsonMessageSerializer : IMessageSerializer
+internal static class JsonMessageSerializer
 {
-    public byte[] Serialize(Message message)
+    public static byte[] Serialize(Message message)
     {
         return message switch
         {
@@ -20,7 +20,7 @@ internal sealed class JsonMessageSerializer : IMessageSerializer
         };
     }
 
-    public Message Deserialize(MessageType messageType, byte[] message)
+    public static Message Deserialize(MessageType messageType, byte[] message)
     {
         return messageType switch
         {

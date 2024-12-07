@@ -2,7 +2,6 @@ namespace Gossip.Core.Abstractions.Peers;
 
 public interface IPeerManager
 {
-    // todo: add events on disconnect and connect peers
     Peer LocalPeer { get; }
 
     int ActiveRemotePeersCount { get; }
@@ -10,8 +9,7 @@ public interface IPeerManager
     IEnumerable<Peer> ActiveRemotePeers { get; }
 
     /// <summary>
-    /// Return peer
-    /// Can return local peer
+    /// Return any peer
     /// </summary>
     /// <param name="address"></param>
     /// <param name="peer"></param>
@@ -19,4 +17,6 @@ public interface IPeerManager
     bool TryGet(PeerAddress address, out Peer peer);
 
     void Add(Peer peer);
+
+    void Unreachable(PeerAddress address);
 }

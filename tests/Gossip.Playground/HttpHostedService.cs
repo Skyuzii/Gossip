@@ -14,12 +14,10 @@ internal sealed class HttpHostedService : IHostedService
 {
     private readonly IGossiper _gossiper;
     private readonly IPeerManager _peerManager;
-    private readonly IMessageSerializer _messageSerializer;
 
-    public HttpHostedService(IGossiper gossiper, IMessageSerializer messageSerializer, IPeerManager peerManager)
+    public HttpHostedService(IGossiper gossiper, IPeerManager peerManager)
     {
         _gossiper = gossiper;
-        _messageSerializer = messageSerializer;
         _peerManager = peerManager;
     }
 
@@ -33,7 +31,7 @@ internal sealed class HttpHostedService : IHostedService
         using var memoryStream = new MemoryStream();
         await context.Request.Body.CopyToAsync(memoryStream);
 
-        Message message = _messageSerializer.Deserialize(messageType, memoryStream.ToArray());
+        Message message = JsonMessageSerializer.Deserialize(messageType, memoryStream.ToArray());
 
         await _gossiper.Enqueue(message, CancellationToken.None);
     }

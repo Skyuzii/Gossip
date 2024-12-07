@@ -10,15 +10,15 @@ internal sealed class HttpMessageSender : IMessageSender, IDisposable
 {
     private const string MessageType = "Gossip-Message-Type";
     private readonly ConcurrentDictionary<PeerAddress, HttpClient> _httpClients;
-    private readonly IMessageSerializer _messageSerializer;
+    private readonly ILogger<HttpMessageSender> _logger;
 
-    public HttpMessageSender(IMessageSerializer messageSerializer)
+    public HttpMessageSender(ILogger<HttpMessageSender> logger)
     {
-        _messageSerializer = messageSerializer;
+        _logger = logger;
         _httpClients = new ConcurrentDictionary<PeerAddress, HttpClient>();
     }
 
-    public async Task Send(PeerAddress receiver, Message message, CancellationToken cancellationToken)
+    public async Task<MessageSendResult> Send(PeerAddress receiver, Message message, CancellationToken cancellationToken)
     {
         try
         {
@@ -27,15 +27,18 @@ internal sealed class HttpMessageSender : IMessageSender, IDisposable
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "/gossiper")
             {
                 Headers = { { MessageType, message.Type.ToString() } },
-                Content = new ByteArrayContent(_messageSerializer.Serialize(message))
+                Content = new ByteArrayContent(JsonMessageSerializer.Serialize(message))
             };
 
             await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+
+            return MessageSendResult.Success;
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            // todo: return error
-            Console.WriteLine(e);
+            _logger.LogError("Error send message -> {ExceptionMessage}", exception.Message);
+
+            return MessageSendResult.Fail;
         }
     }
 

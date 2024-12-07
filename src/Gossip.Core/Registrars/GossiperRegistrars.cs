@@ -38,19 +38,20 @@ public static class GossiperRegistrars
                 var messageHandlers = new IMessageHandler[]
                 {
                     new StartRumorDigestMessageHandler(
-                        peerManager,
-                        receiversPicker,
                         messageSender,
-                        serviceProvider.GetRequiredService<ILogger<StartRumorDigestMessageHandler>>()),
+                        peerManager,
+                        serviceProvider.GetRequiredService<ILogger<StartRumorDigestMessageHandler>>(),
+                        receiversPicker),
                     new RumorDigestMessageHandler(
-                        peerManager,
                         messageSender,
+                        peerManager,
                         serviceProvider.GetRequiredService<ILogger<RumorDigestMessageHandler>>()),
                     new RumorDigestAckMessageHandler(
-                        peerManager,
                         messageSender,
+                        peerManager,
                         serviceProvider.GetRequiredService<ILogger<RumorDigestAckMessageHandler>>()),
                     new RumorDigestAck2MessageHandler(
+                        messageSender,
                         peerManager,
                         serviceProvider.GetRequiredService<ILogger<RumorDigestAck2MessageHandler>>())
                 };

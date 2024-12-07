@@ -32,7 +32,7 @@ internal sealed class Gossiper : IGossiper
 
     public Task Start(CancellationToken cancellationToken)
     {
-        return _startSpreadingGossip ??= StartSpreadingGossip(cancellationToken);
+        return _startSpreadingGossip ??= StartSpreadingGossip(_workLoopCancellation.Token);
     }
 
     public Task Stop(CancellationToken cancellationToken)

@@ -8,6 +8,7 @@ internal sealed class PeerManager : IPeerManager
 {
     private readonly PeerManagerOptions _options;
     private readonly ConcurrentDictionary<PeerAddress, RemotePeer> _activeRemotePeers;
+    private readonly HashSet<PeerAddress> _unreachableRemotePeers;
 
     public PeerManager(
         LocalPeer localPeer,
@@ -16,6 +17,7 @@ internal sealed class PeerManager : IPeerManager
     {
         _options = options;
         LocalPeer = localPeer;
+        _unreachableRemotePeers = new HashSet<PeerAddress>();
         _activeRemotePeers = new ConcurrentDictionary<PeerAddress, RemotePeer>(activeRemoteStartingPeers.ToDictionary(x => x.Address, y => y));
     }
 
@@ -24,6 +26,8 @@ internal sealed class PeerManager : IPeerManager
     public int ActiveRemotePeersCount => _activeRemotePeers.Count;
 
     public IEnumerable<RemotePeer> ActiveRemotePeers => _activeRemotePeers.Values;
+
+    public IReadOnlyCollection<PeerAddress> UnreachableRemotePeers => _unreachableRemotePeers;
 
     public bool TryGet(PeerAddress address, out Peer peer)
     {
@@ -51,11 +55,15 @@ internal sealed class PeerManager : IPeerManager
         DeleteStaleActivePeerIfNeed();
 
         _activeRemotePeers.TryAdd(peer.Address, peer);
+        _unreachableRemotePeers.Remove(peer.Address);
     }
 
     public void Unreachable(PeerAddress address)
     {
+        DeleteStaleUnreachablePeerIfNeed();
+
         _activeRemotePeers.TryRemove(address, out _);
+        _unreachableRemotePeers.Add(address);
     }
 
     private void DeleteStaleActivePeerIfNeed()
@@ -70,6 +78,21 @@ internal sealed class PeerManager : IPeerManager
         if (remotePeer is not null)
         {
             _activeRemotePeers.Remove(remotePeer.Address, out _);
+        }
+    }
+
+    private void DeleteStaleUnreachablePeerIfNeed()
+    {
+        if (_unreachableRemotePeers.Count < _options.UnreachableRemotePeersCapacity)
+        {
+            return;
+        }
+
+        PeerAddress? address = _unreachableRemotePeers.LastOrDefault();
+
+        if (address is not null)
+        {
+            _unreachableRemotePeers.Remove(address.Value);
         }
     }
 }

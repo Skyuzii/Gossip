@@ -15,9 +15,10 @@ public sealed class DefaultReceiversPicker : IReceiversPicker
     public IReadOnlyCollection<PeerAddress> Pick()
     {
         // todo: add optimization on finding starting peer
-        var receivers = new List<PeerAddress>(capacity: 2);
+        var receivers = new List<PeerAddress>(capacity: 3);
 
         RemotePeer[] activeRemotePeers = _peerManager.ActiveRemotePeers.ToArray();
+        IReadOnlyCollection<PeerAddress> unreachableRemotePeers = _peerManager.UnreachableRemotePeers;
 
         Peer? firstReceiver = activeRemotePeers.FirstOrDefault(x => x.IsStarting);
         Peer? secondReceiver = activeRemotePeers.FirstOrDefault(x => !x.IsStarting);
@@ -30,6 +31,11 @@ public sealed class DefaultReceiversPicker : IReceiversPicker
         if (secondReceiver is not null)
         {
             receivers.Add(secondReceiver.Address);
+        }
+
+        if (unreachableRemotePeers.Count > 0)
+        {
+            receivers.Add(unreachableRemotePeers.Skip(Random.Shared.Next(minValue: 0, unreachableRemotePeers.Count - 1)).First());
         }
 
         return receivers;

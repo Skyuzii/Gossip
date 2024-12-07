@@ -56,7 +56,7 @@ internal sealed class HttpHostedService : IHostedService
         foreach (RemotePeer remotePeer in _peerManager.ActiveRemotePeers)
         {
             peerInfo
-                .AppendLine("RemotePeer:")
+                .AppendLine("ActiveRemotePeer:")
                 .AppendLine($"   Address: {remotePeer.Address.Value}")
                 .AppendLine($"   Generation: {remotePeer.Generation.Value}")
                 .AppendLine($"   Rumors:");
@@ -69,6 +69,18 @@ internal sealed class HttpHostedService : IHostedService
                     .AppendLine($"      Version: {rumor.Version.ToString()}")
                     .AppendLine(string.Empty);
             }
+        }
+
+        if (_peerManager.UnreachableRemotePeers.Count > 0)
+        {
+            peerInfo
+                .AppendLine("UnreachableRemotePeers:");
+        }
+
+        foreach (PeerAddress unreachableRemotePeers in _peerManager.UnreachableRemotePeers)
+        {
+            peerInfo
+                .AppendLine($"   Address: {unreachableRemotePeers.Value}");
         }
 
         return context.Response.WriteAsync(peerInfo.ToString(), Encoding.UTF8);

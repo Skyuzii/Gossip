@@ -7,11 +7,13 @@ public sealed class GossiperConfig
 {
     public PeerAddress LocalPeerAddress { get; }
 
-    public int ActiveRemotePeersCapacity { get; } = 100;
+    public int ActiveRemotePeersCapacity { get; }
 
-    public int MessageDispatcherCapacity { get; } = 1000;
+    public int UnreachableRemotePeersCapacity { get; }
 
-    public int SyncDigestInMs { get; } = 1000;
+    public int MessageDispatcherCapacity { get; }
+
+    public int SyncDigestInMs { get; }
 
     public IReadOnlyCollection<PeerAddress> RemoteStartingPeerAddresses { get; }
 
@@ -22,6 +24,7 @@ public sealed class GossiperConfig
     public GossiperConfig(
         PeerAddress localPeerAddress,
         int activeRemotePeersCapacity,
+        int unreachableRemotePeersCapacity,
         int messageDispatcherCapacity,
         int syncDigestInMs,
         IReadOnlyCollection<PeerAddress> remoteStartingPeerAddresses,
@@ -30,6 +33,7 @@ public sealed class GossiperConfig
     {
         LocalPeerAddress = localPeerAddress;
         ActiveRemotePeersCapacity = activeRemotePeersCapacity;
+        UnreachableRemotePeersCapacity = unreachableRemotePeersCapacity;
         MessageDispatcherCapacity = messageDispatcherCapacity;
         SyncDigestInMs = syncDigestInMs;
         RemoteStartingPeerAddresses = remoteStartingPeerAddresses;

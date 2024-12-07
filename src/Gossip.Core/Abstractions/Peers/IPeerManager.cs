@@ -8,6 +8,8 @@ public interface IPeerManager
 
     IEnumerable<RemotePeer> ActiveRemotePeers { get; }
 
+    IReadOnlyCollection<PeerAddress> UnreachableRemotePeers { get; }
+
     /// <summary>
     /// Return any peer
     /// </summary>

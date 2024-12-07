@@ -4,8 +4,11 @@ public sealed class PeerManagerOptions
 {
     public int ActiveRemotePeersCapacity { get; }
 
-    public PeerManagerOptions(int activeRemotePeersCapacity)
+    public int UnreachableRemotePeersCapacity { get; }
+
+    public PeerManagerOptions(int activeRemotePeersCapacity, int unreachableRemotePeersCapacity)
     {
         ActiveRemotePeersCapacity = activeRemotePeersCapacity;
+        UnreachableRemotePeersCapacity = unreachableRemotePeersCapacity;
     }
 }

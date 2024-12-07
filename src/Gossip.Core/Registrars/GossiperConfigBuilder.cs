@@ -9,6 +9,7 @@ public sealed class GossiperConfigBuilder
 {
     private PeerAddress? _localPeerAddress;
     private int? _activeRemotePeersCapacity;
+    private int? _unreachableRemotePeersCapacity;
     private int? _messageDispatcherCapacity;
     private int? _syncDigestInMs;
     private PeerAddress[]? _remoteStartingPeerAddresses;
@@ -25,6 +26,13 @@ public sealed class GossiperConfigBuilder
     public GossiperConfigBuilder SetActiveRemotePeersCapacity(int activeRemotePeersCapacity)
     {
         _activeRemotePeersCapacity = activeRemotePeersCapacity;
+
+        return this;
+    }
+
+    public GossiperConfigBuilder SetUnreachableRemotePeersCapacity(int unreachableRemotePeersCapacity)
+    {
+        _unreachableRemotePeersCapacity = unreachableRemotePeersCapacity;
 
         return this;
     }
@@ -74,6 +82,7 @@ public sealed class GossiperConfigBuilder
         return new GossiperConfig(
             _localPeerAddress ?? new PeerAddress(new Uri(IPAddress.Loopback.ToString())),
             _activeRemotePeersCapacity ?? 100,
+            _unreachableRemotePeersCapacity ?? 100,
             _messageDispatcherCapacity ?? 1000,
             _syncDigestInMs ?? 1000,
             _remoteStartingPeerAddresses ?? Array.Empty<PeerAddress>(),

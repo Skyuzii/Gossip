@@ -46,12 +46,8 @@ public sealed class DefaultReceiversPicker : IReceiversPicker
 
     private bool TryGetRemoteStartingPeer(RemotePeer[] activeRemotePeers, out PeerAddress address)
     {
-        address = default;
-
-        RemotePeer[] remoteStartingPeers = activeRemotePeers.Where(remotePeer => remotePeer.IsStarting).ToArray();
-
-        address = remoteStartingPeers.FirstOrDefault(remotePeer => !_counter.ContainsKey(remotePeer.Address))?.Address
-            ?? _counter.OrderBy(x => x.Value.count).FirstOrDefault().Key;
+        address = activeRemotePeers.FirstOrDefault(remotePeer => remotePeer.IsStarting && !_counter.ContainsKey(remotePeer.Address))?.Address
+            ?? _counter.Where(x => x.Value.isStarting).OrderBy(x => x.Value.count).FirstOrDefault().Key;
 
         _counter.AddOrUpdate(address, _ => (isStarting: true, count: 1), (_, tuple) => (tuple.isStarting, tuple.count + 1));
 
@@ -60,12 +56,8 @@ public sealed class DefaultReceiversPicker : IReceiversPicker
 
     private bool TryGetRemotePeer(RemotePeer[] activeRemotePeers, out PeerAddress address)
     {
-        address = default;
-
-        RemotePeer[] remotePeers = activeRemotePeers.Where(remotePeer => !remotePeer.IsStarting).ToArray();
-
-        address = remotePeers.FirstOrDefault(remotePeer => !_counter.ContainsKey(remotePeer.Address))?.Address
-            ?? _counter.OrderBy(x => x.Value.count).FirstOrDefault().Key;
+        address = activeRemotePeers.FirstOrDefault(remotePeer => !remotePeer.IsStarting && !_counter.ContainsKey(remotePeer.Address))?.Address
+            ?? _counter.Where(x => !x.Value.isStarting).OrderBy(x => x.Value.count).FirstOrDefault().Key;
 
         _counter.AddOrUpdate(address, _ => (isStarting: false, count: 1), (_, tuple) => (tuple.isStarting, tuple.count + 1));
 

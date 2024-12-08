@@ -91,7 +91,7 @@ internal sealed class PeerManager : IPeerManager
 
         RemotePeer? remotePeer = _activeRemotePeers.Values.Where(x => !x.IsStarting).MinBy(x => x.RumorsUpdatedAt);
 
-        if (remotePeer is not null && _activeRemotePeers.Remove(remotePeer.Address, out _))
+        if (remotePeer is not null && _activeRemotePeers.TryRemove(remotePeer.Address, out _))
         {
             DeletedStalePeer?.Invoke(remotePeer);
         }
@@ -104,11 +104,11 @@ internal sealed class PeerManager : IPeerManager
             return;
         }
 
-        PeerAddress? address = _unreachableRemotePeers.LastOrDefault();
+        PeerAddress address = _unreachableRemotePeers.LastOrDefault();
 
-        if (address is not null && _unreachableRemotePeers.Remove(address.Value))
+        if (!address.IsEmpty && _unreachableRemotePeers.Remove(address))
         {
-            DeletedUnreachablePeer?.Invoke(address.Value);
+            DeletedUnreachablePeer?.Invoke(address);
         }
     }
 }

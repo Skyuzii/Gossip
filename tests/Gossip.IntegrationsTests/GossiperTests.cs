@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using Gossip.Core.Abstractions.Peers;
 using Gossip.Core.Abstractions.Peers.Rumors;
 using Gossip.IntegrationsTests.Framework;
@@ -6,10 +8,19 @@ using Gossip.IntegrationsTests.Framework.Extensions;
 
 using Microsoft.Extensions.Hosting;
 
+using Xunit.Abstractions;
+
 namespace Gossip.IntegrationsTests;
 
 public sealed class GossiperTests
 {
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public GossiperTests(ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+    }
+
     [Fact]
     public async Task StartHost_RemoteStartingPeerShouldDiscoveredNewPeer()
     {
@@ -93,5 +104,48 @@ public sealed class GossiperTests
             Assert.Equal(expectedPeerHosts, peerManager.ActiveRemotePeers.Count());
             Assert.Contains(peerHosts.Select(x => x.GetPeerManager()), otherPeerManager => otherPeerManager.LocalPeer.Address != peerManager.LocalPeer.Address && otherPeerManager.ActiveRemotePeers.Any(remotePeer => peerManager.LocalPeer.Address == remotePeer.Address));
         }
+    }
+
+    [Fact]
+    public async Task StartManyHost_AllPeersDiscoveredOnEachPeer_ReturnsTime()
+    {
+        var remoteStartingPeerHosts = new List<IHost>();
+
+        foreach (int remoteStartingPeerPort in Enumerable.Range(start: 5200, count: 10).Select(x => x))
+        {
+            remoteStartingPeerHosts.Add(
+                await HostFactory.Create(port: remoteStartingPeerPort, new GossiperConfiguration { LocalPeer = $"http://localhost:{remoteStartingPeerPort}/" }));
+        }
+
+        var peerHosts = new List<IHost>();
+
+        foreach (int peerPort in Enumerable.Range(start: 5300, count: 50).Select(x => x))
+        {
+            peerHosts.Add(
+                await HostFactory.Create(
+                    port: peerPort,
+                    new GossiperConfiguration
+                    {
+                        LocalPeer = $"http://localhost:{peerPort}/",
+                        RemoteStartingPeerAddresses = remoteStartingPeerHosts.Select(x => x.GetPeerManager().LocalPeer.Address.Value.ToString()).ToArray()
+                    }));
+        }
+
+        int expectedPeerHosts = remoteStartingPeerHosts.Count + peerHosts.Count - 1;
+
+        var sw = Stopwatch.StartNew();
+
+        foreach (IHost peerHost in peerHosts.Concat(remoteStartingPeerHosts))
+        {
+            IPeerManager peerManager = peerHost.GetPeerManager();
+
+            while (expectedPeerHosts != peerManager.ActiveRemotePeers.Count())
+            {
+                // wait
+            }
+        }
+
+        sw.Stop();
+        _testOutputHelper.WriteLine($"All peers discovered for {sw.Elapsed}");
     }
 }

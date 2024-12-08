@@ -42,7 +42,7 @@ public abstract class BaseMessageHandler<TMessage> : IMessageHandler where TMess
 
     protected async Task SendMessage(PeerAddress receiver, Message message, CancellationToken cancellationToken)
     {
-        Logger.LogDebug("Send to {Receiver} the message with type {@MessageType}", receiver.Value, message.Type);
+        Logger.LogDebug("Send to {Receiver} the message with type {@MessageType} by {Sender}", receiver.Value, message.Type, message.Sender.Value);
 
         MessageSendResult result = await MessageSender.Send(receiver, message, cancellationToken);
 

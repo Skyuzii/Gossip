@@ -22,6 +22,11 @@ internal sealed class MessageDispatcher : IMessageDispatcher
         _ = StartProcessingInternal(_workLoopCancellation.Token);
     }
 
+    public async ValueTask Process(Message message, CancellationToken cancellationToken)
+    {
+        await GetMessageHandlerRequired(message.Type).Handle(message, cancellationToken);
+    }
+
     public ValueTask Enqueue(Message message, CancellationToken cancellationToken)
     {
         return _channel.Writer.WriteAsync(message, cancellationToken);
@@ -33,14 +38,18 @@ internal sealed class MessageDispatcher : IMessageDispatcher
         {
             Message message = await _channel.Reader.ReadAsync(cancellationToken);
 
-            if (!_messageHandlers.TryGetValue(message.Type, out IMessageHandler? messageHandler))
-            {
-                // todo: smth do
-                throw new ArgumentOutOfRangeException(nameof(message.Type), message.Type, "Not found message handler for the type");
-            }
-
-            await messageHandler.Handle(message, cancellationToken);
+            await Process(message, cancellationToken);
         }
+    }
+
+    private IMessageHandler GetMessageHandlerRequired(MessageType messageType)
+    {
+        if (!_messageHandlers.TryGetValue(messageType, out IMessageHandler? messageHandler))
+        {
+            throw new ArgumentOutOfRangeException(nameof(messageType), messageType, "Not found message handler for the type");
+        }
+
+        return messageHandler;
     }
 
     public void Dispose()

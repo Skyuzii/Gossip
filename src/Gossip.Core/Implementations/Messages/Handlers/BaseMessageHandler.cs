@@ -35,20 +35,20 @@ public abstract class BaseMessageHandler<TMessage> : IMessageHandler where TMess
             throw new ArgumentOutOfRangeException(nameof(message), message, $"Message is not {typeof(TMessage)}");
         }
 
-        Logger.LogInformation("Start handling message with type {@MessageType} by sender {Sender}", message.Type, castedMessage.Sender.Value);
+        Logger.LogDebug("Start handling message with type {@MessageType} by sender {Sender}", message.Type, castedMessage.Sender.Value);
 
         return HandleInternal(castedMessage, cancellationToken);
     }
 
     protected async Task SendMessage(PeerAddress receiver, Message message, CancellationToken cancellationToken)
     {
-        Logger.LogInformation("Send to {Receiver} the message with type {@MessageType}", receiver.Value, message.Type);
+        Logger.LogDebug("Send to {Receiver} the message with type {@MessageType}", receiver.Value, message.Type);
 
         MessageSendResult result = await MessageSender.Send(receiver, message, cancellationToken);
 
         if (result == MessageSendResult.Fail)
         {
-            Logger.LogInformation("{Receiver} is dead", receiver.Value);
+            Logger.LogDebug("{Receiver} is dead", receiver.Value);
             PeerManager.Unreachable(receiver);
         }
     }

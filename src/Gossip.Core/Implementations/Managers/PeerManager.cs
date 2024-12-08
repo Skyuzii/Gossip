@@ -89,7 +89,7 @@ internal sealed class PeerManager : IPeerManager
             return;
         }
 
-        RemotePeer? remotePeer = _activeRemotePeers.Values.MinBy(x => x.RumorsUpdatedAt);
+        RemotePeer? remotePeer = _activeRemotePeers.Values.Where(x => !x.IsStarting).MinBy(x => x.RumorsUpdatedAt);
 
         if (remotePeer is not null && _activeRemotePeers.Remove(remotePeer.Address, out _))
         {

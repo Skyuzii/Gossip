@@ -9,14 +9,18 @@ namespace Gossip.IntegrationsTests.Framework;
 
 internal static class HostFactory
 {
-    public static IHost Create(int port, GossiperConfiguration gossiperConfiguration)
+    public static async Task<IHost> Create(int port, GossiperConfiguration gossiperConfiguration)
     {
-        return Host
+        IHost host = Host
             .CreateDefaultBuilder()
             .ConfigureWebHostDefaults(webHost => webHost.UseKestrel(options => options.ListenLocalhost(port)).UseStartup<Startup>())
             .ConfigureAppConfiguration(builder => builder.AddInMemoryCollection(BuildConfiguration(gossiperConfiguration)))
-            .ConfigureLogging(static builder => builder.AddDebug().SetMinimumLevel(LogLevel.Debug))
+            .ConfigureLogging(static builder => builder.SetMinimumLevel(LogLevel.Debug))
             .Build();
+
+        await host.StartAsync();
+
+        return host;
     }
 
     private static Dictionary<string, string?> BuildConfiguration(GossiperConfiguration gossiperConfiguration)

@@ -31,9 +31,15 @@ public sealed class Startup
                 builder =>
                 {
                     builder
-                        .SetMessageSender(serviceProvider => new HttpMessageSender(serviceProvider.GetRequiredService<ILogger<HttpMessageSender>>(), serviceProvider.GetRequiredService<IPeerManager>()))
+                        .SetMessageSender(
+                            serviceProvider => new HttpMessageSender(
+                                serviceProvider.GetRequiredService<ILogger<HttpMessageSender>>(),
+                                serviceProvider.GetRequiredService<IPeerManager>()))
                         .SetLocalPeerAddress(new PeerAddress(new Uri(gossiperConfig!.LocalPeer)))
-                        .SetSyncDigestInMs(gossiperConfig.SyncDigestInMs);
+                        .SetSyncDigestInMs(gossiperConfig.SyncDigestInMs)
+                        .SetActiveRemotePeersCapacity(gossiperConfig.ActiveRemotePeersCapacity)
+                        .SetUnreachableRemotePeersCapacity(gossiperConfig.UnreachableRemotePeersCapacity)
+                        .SetMessageDispatcherCapacity(gossiperConfig.MessageDispatcherCapacity);
 
                     if (gossiperConfig.RemoteStartingPeerAddresses.Length > 0)
                     {

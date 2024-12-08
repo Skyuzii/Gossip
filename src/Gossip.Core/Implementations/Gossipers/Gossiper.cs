@@ -55,9 +55,9 @@ internal sealed class Gossiper : IGossiper
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(_options.SyncDigestInMs), cancellationToken);
 
-                _logger.LogInformation("Start spreading gossip");
+                _logger.LogDebug("Start spreading gossip");
 
-                await _messageDispatcher.Enqueue(new StartRumorDigestMessage(_peerManager.LocalPeer.Address), cancellationToken);
+                await _messageDispatcher.Process(new StartRumorDigestMessage(_peerManager.LocalPeer.Address), cancellationToken);
             }
             catch (OperationCanceledException exception) when(exception.CancellationToken == cancellationToken)
             {

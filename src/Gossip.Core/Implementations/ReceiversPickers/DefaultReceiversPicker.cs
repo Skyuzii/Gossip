@@ -14,6 +14,9 @@ public sealed class DefaultReceiversPicker : IReceiversPicker
     {
         _peerManager = peerManager;
         _counter = new ConcurrentDictionary<PeerAddress, (bool isStarting, int count)>();
+
+        peerManager.DeletedStalePeer += peer => _counter.TryRemove(peer.Address, out _);
+        peerManager.NewUnreachablePeer += peerAddress => _counter.TryRemove(peerAddress, out _);
     }
 
     public IReadOnlyCollection<PeerAddress> Pick()

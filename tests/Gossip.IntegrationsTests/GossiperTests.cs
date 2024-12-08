@@ -74,8 +74,6 @@ public sealed class GossiperTests
         foreach (int remoteStartingPeerPort in Enumerable.Range(start: 5200, count: 10).Select(x => x))
         {
             remoteStartingPeerHosts.Add(await HostFactory.Create(port: remoteStartingPeerPort, new GossiperConfiguration { LocalPeer = $"http://localhost:{remoteStartingPeerPort}/" }));
-
-            await Task.Delay(TimeSpan.FromMilliseconds(Random.Shared.Next(minValue: 100, maxValue: 1000)));
         }
 
         var peerHosts = new List<IHost>();
@@ -83,8 +81,6 @@ public sealed class GossiperTests
         foreach (int peerPort in Enumerable.Range(start: 5300, count: 50).Select(x => x))
         {
             peerHosts.Add(await HostFactory.Create(port: peerPort, new GossiperConfiguration { LocalPeer = $"http://localhost:{peerPort}/", RemoteStartingPeerAddresses = remoteStartingPeerHosts.Select(x => x.GetPeerManager().LocalPeer.Address.Value.ToString()).ToArray() }));
-
-            await Task.Delay(TimeSpan.FromMilliseconds(Random.Shared.Next(minValue: 100, maxValue: 1000)));
         }
 
         await Task.Delay(TimeSpan.FromSeconds(10));

@@ -10,6 +10,7 @@ internal sealed class MessageDispatcher : IMessageDispatcher
     private readonly Channel<Message> _channel;
     private readonly IReadOnlyDictionary<MessageType, IMessageHandler> _messageHandlers;
     private readonly CancellationTokenSource _workLoopCancellation;
+    private int _isDisposed;
 
     public MessageDispatcher(
         MessageDispatcherOptions options,
@@ -36,9 +37,16 @@ internal sealed class MessageDispatcher : IMessageDispatcher
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            Message message = await _channel.Reader.ReadAsync(cancellationToken);
+            try
+            {
+                Message message = await _channel.Reader.ReadAsync(cancellationToken);
 
-            await Process(message, cancellationToken);
+                await Process(message, cancellationToken);
+            }
+            catch (OperationCanceledException exception) when(exception.CancellationToken == cancellationToken)
+            {
+                break;
+            }
         }
     }
 

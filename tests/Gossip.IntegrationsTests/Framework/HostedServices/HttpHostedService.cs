@@ -92,18 +92,10 @@ internal sealed class HttpHostedService : IHostedService
 
     public Task AddRumor(HttpContext context)
     {
-        string rumorName = HttpUtility.ParseQueryString(context.Request.QueryString.Value).Get("rumorName");
-        string rumorValue = HttpUtility.ParseQueryString(context.Request.QueryString.Value).Get("rumorValue");
-        string? rumorVersionStr = HttpUtility.ParseQueryString(context.Request.QueryString.Value).Get("rumorVersion");
+        string rumorName = HttpUtility.ParseQueryString(context.Request.QueryString.Value!).Get("rumorName")!;
+        string rumorValue = HttpUtility.ParseQueryString(context.Request.QueryString.Value!).Get("rumorValue")!;
 
-        RumorVersion? rumorVersion = null;
-
-        if (!string.IsNullOrWhiteSpace(rumorVersionStr))
-        {
-            rumorVersion = new RumorVersion(long.Parse(rumorVersionStr));
-        }
-
-        _peerManager.LocalPeer.Apply(new[] { new Rumor(new RumorName(rumorName), new RumorValue(rumorValue), rumorVersion ?? RumorVersion.New()) });
+        _peerManager.LocalPeer.Apply(new Rumor(new RumorName(rumorName), new RumorValue(rumorValue), RumorVersion.New()));
 
         return Task.CompletedTask;
     }

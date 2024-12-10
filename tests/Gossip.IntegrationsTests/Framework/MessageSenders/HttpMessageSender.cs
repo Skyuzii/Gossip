@@ -49,6 +49,10 @@ internal sealed class HttpMessageSender : IMessageSender, IDisposable
 
             return MessageSendResult.Success;
         }
+        catch (OperationCanceledException exception) when (exception.CancellationToken == cancellationToken)
+        {
+            throw;
+        }
         catch (Exception exception)
         {
             _logger.LogError("Error send message -> {ExceptionMessage}", exception.Message);

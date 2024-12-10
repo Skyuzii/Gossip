@@ -16,19 +16,6 @@ public sealed class LocalPeer : Peer
         return new LocalPeer(
             address,
             PeerGeneration.New(),
-            new[] { new Rumor(RumorName.HeartBeat, new RumorValue("Good"), RumorVersion.New()) });
-    }
-
-    /// <summary>
-    /// Apply rumors
-    /// Add if none exists, or update if version is greater
-    /// </summary>
-    /// <param name="rumors"></param>
-    public void Apply(IReadOnlyCollection<Rumor> rumors)
-    {
-        foreach (Rumor? rumor in rumors)
-        {
-            Apply(rumor);
-        }
+            new[] { Rumor.NextHeartBeat() });
     }
 }

@@ -32,7 +32,7 @@ public abstract class Peer
         return RumorsProtected.Values.MaxBy(x => x.Version)?.Version ?? RumorVersion.Empty();
     }
 
-    protected void Apply(Rumor rumor)
+    public void Apply(Rumor rumor)
     {
         if (!RumorsProtected.TryGetValue(rumor.Name, out Rumor? existRumor))
         {
